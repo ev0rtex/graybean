@@ -5,7 +5,7 @@ Example:
     $ graybean.py \
           --beanstalk bean3.ksl.com:11300 \
           --graylog graylog.deseretdigital.com:11211 \
-          --tube default
+          --tubes default
 """
 import os.path as osp
 import sys
@@ -90,7 +90,8 @@ def main():
     # Get connected
     queue = gs.Client(**beanstalk)
     tubes = [x.strip() for x in args.tubes.split(',')]
-    print("Collecting stats for tube{} '{}' every 5 seconds...".format('s' if len(tubes) > 1 else '', ', '.join(tubes)))
+    print("Collecting stats for tube{} '{}' every 5 seconds..."
+          .format('s' if len(tubes) > 1 else '', ', '.join(tubes)))
     while True:
         try:
             for tube in tubes:
