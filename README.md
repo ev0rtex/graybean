@@ -19,7 +19,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/opt/graybean/graybean.py -b bean.example.com:11300 -g graylog.example.com:12201 -u -t default
+ExecStart=/opt/graybean/graybean.py -b bean.example.com:11300 -g graylog.example.com:12201 -u -t default,my_tube
 Restart=on-failure
 StandardOutput=syslog
 StandardError=syslog
