@@ -5,6 +5,7 @@ GELF logger for beanstalk tube stats
 You can just run it like so:
 
 ```sh
+sudo pip3 install -r requirements.txt
 graybean.py -b bean.example.com:11300 -g graylog.example.com:12201 -u -t default
 ```
 
@@ -18,8 +19,11 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/opt/graybean/graybean.py -b bean.example.com:11300 -g graylog.example.com:12201 -u -t default >> /var/log/graybean.log 2>&1
+ExecStart=/opt/graybean/graybean.py -b bean.example.com:11300 -g graylog.example.com:12201 -u -t default
 Restart=on-failure
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=graybean
 
 [Install]
 WantedBy=multi-user.target
@@ -31,4 +35,17 @@ sudo chmod 644 /etc/systemd/system/graybean.service
 sudo systemctl daemon-reload
 sudo systemctl enable graybean.service
 sudo systemctl start graybean.service
+```
+
+and be sure to set up the syslog config:
+
+_/etc/rsyslog.d/graybean.conf_
+```
+if $programname == 'graybean-default' then /var/log/graybean-default.log
+& stop
+```
+
+and restart syslog:
+```sh
+sudo systemctl restart syslog
 ```
