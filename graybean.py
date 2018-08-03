@@ -34,8 +34,8 @@ def main():
     parser.add_argument("-b", "--beanstalk", type=str, help="beanstalk server and port")
     parser.add_argument("-g", "--graylog", type=str,
                         help="graylog server and port for GELF input")
-    parser.add_argument("-t", "--tube", type=str, default="default",
-                        help="name of the tube to watch")
+    parser.add_argument("-t", "--tubes", type=str, default="default",
+                        help="list of tubes to watch (comma-separated)")
     parser.add_argument("-u", "--udp", action="store_true",
                         help="use UDP for GELF graylog connection (TCP is default)")
     args = parser.parse_args()
@@ -60,8 +60,8 @@ def main():
         }
         graylog['host'], _, graylog['port'] = args.graylog.partition(':')
 
-    if not args.tube:
-        print("You need to provide a tube to monitor stats for")
+    if not args.tubes:
+        print("You need to provide one or more tubes to monitor stats for")
         sys.exit(1)
 
     #
@@ -89,18 +89,19 @@ def main():
 
     # Get connected
     queue = gs.Client(**beanstalk)
-    print("Collecting stats for tube '{}' every 5 seconds...".format(args.tube))
+    tubes = [x.strip() for x in args.tubes.split(',')]
+    print("Collecting stats for tube{} '{}' every 5 seconds...".format('s' if len(tubes) > 1 else '', ', '.join(tubes)))
     while True:
         try:
-            stats = queue.stats_tube(args.tube)
-            record = merged(logging_defaults, {
-                    'msg': "Stats for tube '{}' from '{}'".format(args.tube,
-                                                                  beanstalk['host']),
-                    'tube': args.tube
-                },
-                stats
-            )
-            logger.handle(logging.makeLogRecord(record))
+            for tube in tubes:
+                record = merged(logging_defaults, {
+                        'msg': "Stats for tube '{}' from '{}'".format(tube,
+                                                                      beanstalk['host']),
+                        'tube': tube
+                    },
+                    queue.stats_tube(tube)
+                )
+                logger.handle(logging.makeLogRecord(record))
 
             # Sleep for 5s
             time.sleep(5)
