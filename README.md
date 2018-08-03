@@ -41,7 +41,7 @@ and be sure to set up the syslog config:
 
 _/etc/rsyslog.d/graybean.conf_
 ```
-if $programname == 'graybean-default' then /var/log/graybean-default.log
+if $programname == 'graybean' then /var/log/graybean.log
 & stop
 ```
 
